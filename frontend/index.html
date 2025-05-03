@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AuthMini</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body
+    x-data="app()"
+    class="bg-gray-100 min-h-screen flex items-center justify-center"
+    x-init="init()"
+  >
+    <!-- Login/Register Form -->
+    <div x-show="!user" class="form-container">
+      <div x-data="authComponent()">
+        <h2 class="text-2xl font-bold mb-4 text-white">
+          AuthMini Login / Register
+        </h2>
+        <input
+          x-model="email"
+          @input="validate()"
+          type="email"
+          placeholder="Email"
+          class="w-full text-gray-700 p-2 mb-4 rounded"
+        />
+        <input
+          x-model="password"
+          @input="validate()"
+          type="password"
+          placeholder="Password"
+          class="w-full text-gray-700 p-2 mb-4 rounded"
+        />
+        <button
+          @click="submit('register')"
+          class="btn-primary"
+          :class="{ 'opacity-50 cursor-not-allowed': errors.email || errors.password }"
+        >
+          Register
+        </button>
+        <button
+          @click="submit('login')"
+          class="btn-primary ml-2"
+          :class="{ 'opacity-50 cursor-not-allowed': errors.email || errors.password }"
+        >
+          Login
+        </button>
+        <p x-text="error" class="text-red-500 mt-2"></p>
+        <p x-text="errors.email" class="text-red-500 mt-2"></p>
+        <p x-text="errors.password" class="text-red-500 mt-2"></p>
+      </div>
+    </div>
+
+    <!-- User Dashboard -->
+    <div
+      x-show="user !== null && user.role === 'user'"
+      class="form-container"
+    >
+      <h2 class="text-2xl font-bold mb-4 text-white">
+        Welcome, <span x-text="user?.email || 'User'"></span>
+      </h2>
+      <button @click="showProfile = true" class="btn-primary">
+        Edit Profile
+      </button>
+      <button @click="logout()" class="btn-primary ml-2">Logout</button>
+      <div x-show="showProfile" class="mt-4" x-data="profileComponent()">
+        <h3 class="text-lg font-semibold mb-2 text-white">Edit Profile</h3>
+        <input
+          x-model="profile.display_name"
+          placeholder="Display Name"
+          class="w-full text-gray-700 p-2 mb-2 rounded"
+        />
+        <textarea
+          x-model="profile.bio"
+          placeholder="Bio"
+          class="w-full text-gray-700 p-2 mb-2 rounded"
+        ></textarea>
+        <input
+          x-model="profile.avatar_url"
+          placeholder="Avatar URL"
+          class="w-full text-gray-700 p-2 mb-2 rounded"
+        />
+        <input
+          x-model="password"
+          type="password"
+          placeholder="New Password"
+          class="w-full text-gray-700 p-2 mb-2 rounded"
+        />
+        <select
+          x-model="settings.theme"
+          class="w-full text-gray-700 p-2 mb-2 rounded"
+        >
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+        <label class="text-white">
+          <input x-model="settings.notifications" type="checkbox" />
+          Enable Notifications
+        </label>
+        <button
+          @click="saveProfile()"
+          class="btn-primary mt-2"
+          :class="{ 'animate-pulse': loading }"
+        >
+          Save
+        </button>
+        <p x-text="error" class="text-red-500 mt-2"></p>
+      </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div
+      x-show="user !== null && user.role === 'admin'"
+      class="form-container"
+    >
+      <h2 class="text-2xl font-bold mb-4 text-white">Admin Dashboard</h2>
+      <input
+        x-model="search"
+        @input.debounce="fetchUsers()"
+        placeholder="Search users..."
+        class="w-full text-gray-700 p-2 mb-4 rounded"
+      />
+      <h3 class="text-lg font-semibold mb-2 text-white">Users</h3>
+      <ul class="mb-4">
+        <template x-for="u in users" :key="u.id">
+          <li class="text-white flex justify-between items-center">
+            <span
+              x-text="`${u.email} (${u.role}) - Active: ${u.is_active ? 'Yes' : 'No'}`"
+            ></span>
+            <button
+              @click="toggleUser(u.id, !u.is_active)"
+              class="btn-primary text-sm"
+              :class="{ 'animate-pulse': loading }"
+            >
+              <span x-text="u.is_active ? 'Disable' : 'Enable'"></span>
+            </button>
+          </li>
+        </template>
+      </ul>
+      <button @click="logout()" class="btn-primary">Logout</button>
+    </div>
+
+    <script src="js/app.js" defer></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/profile.js" defer></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js"
+      defer
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"
+      defer
+    ></script>
+  </body>
+</html>
