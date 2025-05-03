@@ -40,13 +40,12 @@ async function startServer() {
   await fastify.register(registerUserRoutes, { prefix: '/api' });
 
   try {
-    // Start server on specified port for render use 10000
+    // Use dynamic port from environment variable
     const port = process.env.PORT || 3000;
-    // Bind to 0.0.0.0 in production (Render), otherwise use default (localhost)
-    const host =
-      process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
+    // Bind to 0.0.0.0 to make it accessible externally on Render
+    const host = '0.0.0.0';
     await fastify.listen({ port, host });
-    fastify.log.info(`Server running on port ${process.env.PORT}`);
+    fastify.log.info(`Server running on port ${port}`);
   } catch (err) {
     // Log and exit on server failure
     fastify.log.error(err);
